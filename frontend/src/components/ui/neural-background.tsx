@@ -8,6 +8,8 @@ interface Particle {
     vx: number;
     vy: number;
     radius: number;
+    update(): void;
+    draw(): void;
 }
 
 interface MousePosition {
@@ -38,11 +40,11 @@ export function NeuralBackground() {
 
         // Particle class
         class ParticleClass implements Particle {
-            x: number;
-            y: number;
-            vx: number;
-            vy: number;
-            radius: number;
+            x: number = 0;
+            y: number = 0;
+            vx: number = 0;
+            vy: number = 0;
+            radius: number = 0;
 
             constructor() {
                 if (!canvas) return;

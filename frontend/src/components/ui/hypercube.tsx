@@ -63,7 +63,7 @@ export function Hypercube() {
                     ease: "easeInOut"
                 }}
             >
-                <div className="w-full h-full bg-linear-to-r from-primary via-purple-500 to-pink-500 opacity-60 blur-xl" />
+                <div className="w-full h-full bg-linear-to-r from-primary via-purple-500 to-indigo-400 opacity-60 blur-xl" />
             </motion.div>
 
             {/* Energy particles */}
@@ -120,7 +120,7 @@ export function Hypercube() {
                     <linearGradient id="quantum-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#6366f1" stopOpacity="0.8" />
                         <stop offset="50%" stopColor="#a855f7" stopOpacity="1" />
-                        <stop offset="100%" stopColor="#ec4899" stopOpacity="0.8" />
+                        <stop offset="100%" stopColor="#6366f1" stopOpacity="0.8" />
                     </linearGradient>
                 </defs>
             </svg>

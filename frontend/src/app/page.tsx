@@ -109,7 +109,7 @@ function PortalButton({ children, className, ...props }: any) {
                         className="absolute inset-0 rounded-xl"
                         style={{ zIndex: -1 }}
                     >
-                        <div className="w-full h-full rounded-xl bg-linear-to-r from-primary via-purple-500 to-pink-500 opacity-80 animate-spin" 
+                        <div className="w-full h-full rounded-xl bg-linear-to-r from-primary via-purple-500 to-indigo-400 opacity-80 animate-spin" 
                              style={{ animationDuration: '3s' }} />
                         <div className="absolute inset-0 rounded-xl bg-black/20 backdrop-blur-sm" />
                     </motion.div>
@@ -130,7 +130,7 @@ export default function HomePage() {
       
       <div className="container mx-auto px-6 relative z-10 min-h-screen flex flex-col justify-center">
         
-        {/* Neural HUD */}
+        {/* Network HUD */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -140,7 +140,7 @@ export default function HomePage() {
           <div className="flex gap-8">
             <span className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                NEURAL_SYNC
+                AGENT_SYNC
             </span>
             <span>THROUGHPUT: 1.2TB/s</span>
             <span>LATENCY: 3ms</span>
@@ -154,23 +154,24 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center mt-10">
           
-          {/* Left: Neural Interface Content */}
+          {/* Left: Hero Content */}
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
             <motion.div 
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-white/50 backdrop-blur-sm text-primary text-xs font-medium tracking-widest mb-8 shadow-sm"
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-white/50 backdrop-blur-sm text-primary text-xs font-medium tracking-widest mb-0 mt-4 shadow-sm"
                 whileHover={{ scale: 1.05, backgroundColor: "rgba(99, 102, 241, 0.1)" }}
             >
               <Brain className="w-3 h-3" />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
-                  NEURAL INTERFACE ONLINE
+              <span className="bg-clip-text text-transparent bg-linear-to-r from-primary to-purple-600">
+                  AGENT NETWORK ONLINE
               </span>
             </motion.div>
 
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[0.9] mb-8">
+            <div className="mt-8">
+              <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[0.9] mb-8">
               <div className="overflow-hidden h-[1.1em] flex items-center">
                 <motion.span 
                     initial={{ y: "100%" }} 
@@ -208,10 +209,11 @@ export default function HomePage() {
                 </span>
               </div>
             </h1>
+            </div>
 
             <p className="text-base text-muted-foreground max-w-lg mb-12 leading-relaxed">
-              The first <span className="text-primary font-medium">neural prompt marketplace</span>. 
-              Deploy autonomous agents to aggressively refine, test, and optimize your system prompts for <span className="text-foreground font-normal border-b-2 border-primary/20">perfect outputs</span>.
+              The first <span className="text-primary font-medium">decentralized prompt optimization protocol</span>. 
+              Deploy autonomous agents that relentlessly refine prompts for <span className="text-foreground font-normal border-b-2 border-primary/20">flawless execution</span>.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-5">
@@ -235,12 +237,12 @@ export default function HomePage() {
               >
                 <Link href="/dashboard" className="flex items-center gap-2">
                   <Terminal className="w-4 h-4 text-primary" />
-                  NEURAL_DOCS
+                  AGENT_DOCS
                 </Link>
               </MagneticButton>
             </div>
 
-            {/* Neural Stack Indicators */}
+            {/* Tech Stack Indicators */}
             <div className="mt-20 pt-8 border-t border-dashed border-zinc-200 flex gap-10 opacity-60">
                <div className="flex items-center gap-2 text-[10px] font-medium tracking-wide uppercase hover:text-primary transition-colors cursor-help">
                    <Cpu className="w-4 h-4" /> LLAMA-3
@@ -249,12 +251,12 @@ export default function HomePage() {
                    <Network className="w-4 h-4" /> BITTENSOR
                </div>
                <div className="flex items-center gap-2 text-[10px] font-medium tracking-wide uppercase hover:text-primary transition-colors cursor-help">
-                   <Brain className="w-4 h-4" /> NEURAL_SYNC
+                   <Lock className="w-4 h-4" /> ZK-ROLLUP
                </div>
             </div>
           </motion.div>
 
-          {/* Right: 3D Neural Orb */}
+          {/* Right: 4D Hypercube */}
           <div className="relative h-[600px] hidden lg:block perspective-[2000px]">
              
              {/* 4D Hypercube */}
@@ -278,7 +280,7 @@ export default function HomePage() {
              >
                 <div className="relative bg-white/80 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden group">
                     {/* Iridescent Border Gradient on Hover */}
-                    <div className="absolute inset-0 p-[1px] rounded-2xl bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)' }} />
+                    <div className="absolute inset-0 p-px rounded-2xl bg-linear-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)' }} />
                     
                     <div className="p-4 bg-zinc-50 border-b border-zinc-100 flex items-center gap-2 px-4">
                         <div className="flex gap-1.5">
@@ -286,7 +288,7 @@ export default function HomePage() {
                             <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/80" />
                             <div className="w-2.5 h-2.5 rounded-full bg-green-400/80" />
                         </div>
-                        <div className="text-[10px] font-medium text-zinc-400 ml-4 tracking-widest">NEURAL_STREAM.PY</div>
+                        <div className="text-[10px] font-medium text-zinc-400 ml-4 tracking-widest">AGENT_STREAM.py</div>
                     </div>
                     <div className="p-6 font-mono text-xs space-y-3 text-zinc-600">
                         <div className="flex justify-between text-zinc-400">
@@ -294,22 +296,22 @@ export default function HomePage() {
                             <span>pid: 8492</span>
                         </div>
                         <div className="p-3 bg-zinc-50 rounded border border-zinc-100">
-                            <span className="text-purple-600">def</span> <span className="text-blue-600">neural_sync</span>(data):<br/>
-                            &nbsp;&nbsp;<span className="text-zinc-400"># processing neural patterns</span><br/>
+                            <span className="text-purple-600">def</span> <span className="text-blue-600">agent_sync</span>(data):<br/>
+                            &nbsp;&nbsp;<span className="text-zinc-400"># processing agent telemetry</span><br/>
                             &nbsp;&nbsp;patterns = decode(data)<br/>
-                            &nbsp;&nbsp;<span className="text-pink-500">return</span> optimize(patterns)
+                            &nbsp;&nbsp;<span className="text-indigo-500">return</span> optimize(patterns)
                         </div>
                         <div className="flex gap-2 mt-4">
                              <div className="h-1 flex-1 bg-zinc-100 rounded-full overflow-hidden">
                                 <motion.div 
-                                    className="h-full bg-gradient-to-r from-primary to-purple-600" 
+                                    className="h-full bg-linear-to-r from-primary to-purple-600" 
                                     initial={{ width: "0%" }}
                                     animate={{ width: "100%" }}
                                     transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
                                 />
                              </div>
                         </div>
-                        <div className="text-[10px] text-zinc-400 text-right">NEURAL_SYNC: 98.4%</div>
+                        <div className="text-[10px] text-zinc-400 text-right">AGENT_SYNC: 98.4%</div>
                     </div>
                 </div>
              </motion.div>
@@ -326,7 +328,7 @@ export default function HomePage() {
                     <div className="absolute top-0 right-0 p-4 opacity-20">
                         <Brain className="w-16 h-16" />
                     </div>
-                    <div className="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-4">Neural Metrics</div>
+                    <div className="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-4">Network Metrics</div>
                     <div className="flex justify-between items-end mb-4">
                          <div>
                              <div className="text-2xl font-semibold text-white">98.4%</div>
@@ -338,7 +340,7 @@ export default function HomePage() {
                     </div>
                     <div className="space-y-2">
                         <div className="flex justify-between text-[10px] text-zinc-500">
-                            <span>NEURAL_NODES</span>
+                            <span>ACTIVE_AGENTS</span>
                             <span>142/150</span>
                         </div>
                         <div className="flex gap-1">

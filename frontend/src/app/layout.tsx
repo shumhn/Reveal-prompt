@@ -18,7 +18,7 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PromptForge - Decentralized Prompt Optimization",
+  title: "Reveal Prompt - Decentralized Prompt Optimization",
   description: "Optimize your AI prompts for perfect JSON outputs using our decentralized network of autonomous agents.",
 };
 

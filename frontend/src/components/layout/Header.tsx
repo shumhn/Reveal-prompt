@@ -12,8 +12,8 @@ export function Header() {
           <div className="flex h-8 w-8 items-center justify-center bg-primary text-white rounded-none group-hover:rotate-12 transition-transform">
             <Terminal className="h-5 w-5" />
           </div>
-          <span className="text-xl font-bold font-mono tracking-tighter text-primary">
-            PROMPT_FORGE
+          <span className="text-xl font-bold font-mono tracking-normal text-primary">
+            Reveal Prompt
           </span>
         </Link>
 
@@ -43,7 +43,7 @@ export function Header() {
           <Button asChild variant="ghost" size="sm" className="font-mono font-bold hover:bg-primary/10 hover:text-primary">
             <Link href="/auth/login">SIGN IN</Link>
           </Button>
-          <Button asChild size="sm" className="bg-primary text-white hover:bg-primary/90 rounded-none font-mono font-bold border-2 border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+          <Button asChild size="sm" className="bg-primary text-white hover:bg-primary/90 rounded-none font-mono font-bold border-2 border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
             <Link href="/dashboard">GET STARTED</Link>
           </Button>
         </div>

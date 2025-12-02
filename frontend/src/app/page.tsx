@@ -21,7 +21,7 @@ export default function HomePage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-6xl md:text-[80px] font-bold tracking-tight leading-[0.95] mb-8">
+            <h1 className="text-6xl md:text-[80px] font-bold tracking-normal leading-[0.95] mb-8 font-mono">
               Decentralized
               <br />
               Prompt

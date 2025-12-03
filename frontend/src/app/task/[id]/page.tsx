@@ -24,6 +24,7 @@ import PromptComparison from "@/components/PromptComparison";
 import SavingsChart from "@/components/SavingsChart";
 import QueryResultsComparison from "@/components/QueryResultsComparison";
 import TaskDetailSkeleton from "@/components/TaskDetailSkeleton";
+import PerformanceAnalytics from "@/components/PerformanceAnalytics";
 import EmptyState from "@/components/EmptyState";
 import { QuantumBackground } from "@/components/ui/quantum-background";
 import { TechBadge } from "@/components/ui/tech-badge";
@@ -207,9 +208,9 @@ export default function TaskDetailPage() {
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 border-b border-zinc-200 pb-6"
+                    className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 border-b border-zinc-200 pb-6 w-full"
                 >
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 shrink-0">
                         <Button
                             variant="ghost"
                             className="w-fit pl-0 hover:bg-transparent hover:text-primary text-zinc-400 mb-2"
@@ -229,7 +230,7 @@ export default function TaskDetailPage() {
                         </div>
                     </div>
 
-                    <div className="flex gap-3 mt-4 md:mt-0">
+                    <div className="flex gap-3 mt-4 md:mt-0 shrink-0">
                         <Button
                             variant="outline"
                             onClick={exportResults}
@@ -306,8 +307,25 @@ export default function TaskDetailPage() {
                         />
                     </div>
 
+
+
                     {/* Bottom Section: Full Width Charts */}
                     <div className="lg:col-span-12 space-y-6">
+
+                        {/* Performance Analytics Dashboard */}
+                        {hasSamples && (
+                            <PerformanceAnalytics
+                                data={{
+                                    originalTokens: avgOriginalTokens,
+                                    optimizedTokens: avgOptimizedTokens,
+                                    originalLatency: avgOriginalLatency,
+                                    optimizedLatency: avgOptimizedLatency,
+                                    sampleCount: active.sampleResults.length
+                                }}
+                                samples={active.sampleResults}
+                            />
+                        )}
+
                         {/* System Diagnostics - Full Width */}
                         {hasSamples && (
                             <motion.div

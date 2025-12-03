@@ -14,9 +14,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, Send, Clock, CheckCircle2, XCircle, Zap, Activity, Plus, X, Lightbulb, Target, Battery, Gauge, BarChart3 } from "lucide-react";
+import { Sparkles, Send, Clock, CheckCircle2, XCircle, Zap, Activity, Plus, X, Lightbulb, Target, Battery, Gauge, BarChart3, ArrowRight, Terminal } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { DataModule } from "@/components/ui/data-module";
+import { TechBadge } from "@/components/ui/tech-badge";
+import { QuantumText } from "@/components/ui/quantum-text";
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
@@ -36,6 +39,7 @@ const seedTasks = [
         score: null,
         progress: 67,
         createdAt: "2025-12-02T14:15:00",
+        model: "GPT-4 Turbo"
     },
     {
         id: "task-3",
@@ -44,15 +48,9 @@ const seedTasks = [
         score: null,
         progress: 0,
         createdAt: "2025-12-02T16:45:00",
+        model: "Claude 3 Opus"
     },
 ];
-
-const statusConfig = {
-    queued: { icon: Clock, color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/30", label: "Queued" },
-    optimizing: { icon: Sparkles, color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/30", label: "Optimizing" },
-    validated: { icon: CheckCircle2, color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/30", label: "Validated" },
-    failed: { icon: XCircle, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30", label: "Failed" },
-};
 
 // Example template
 const exampleTemplate = {
@@ -101,822 +99,368 @@ export default function OptimizePage() {
         e.preventDefault();
         setIsSubmitting(true);
 
-        const cleanedQueries = sampleQueries.filter(q => q.trim());
-
-        const fakeSampleResults = cleanedQueries.map((q, index) => {
-            const baseTokens = Math.max(60, Math.min(200, q.length / 4));
-            const optimizedTokens = Math.round(baseTokens * 0.65);
-            const baseLatency = 800 + index * 150;
-            const optimizedLatency = Math.round(baseLatency * 0.7);
-
-            // Detect task type from system prompt or query content
-            const isProductTask = systemPrompt.toLowerCase().includes('product') || systemPrompt.toLowerCase().includes('e-commerce');
-            const isSentimentTask = systemPrompt.toLowerCase().includes('sentiment') || systemPrompt.toLowerCase().includes('review');
-            const isInvoiceTask = systemPrompt.toLowerCase().includes('invoice') || systemPrompt.toLowerCase().includes('billing');
-            const isEmailTask = systemPrompt.toLowerCase().includes('email') || systemPrompt.toLowerCase().includes('intent');
-            const isJobTask = systemPrompt.toLowerCase().includes('job') || q.toLowerCase().includes('developer') || q.toLowerCase().includes('manager') || q.toLowerCase().includes('position');
-
-            let originalResponse = '';
-            let optimizedResponse = '';
-
-            if (isJobTask) {
-                // Job posting extraction
-                const titleMatch = q.match(/^([^-@.]+?)(?:\s+at|\s+-|$)/);
-                const jobTitle = titleMatch ? titleMatch[1].trim() : "Software Developer";
-                const companyMatch = q.match(/(?:at|@)\s+([^-.]+)/);
-                const company = companyMatch ? companyMatch[1].trim() : "TechCorp";
-                const salaryMatch = q.match(/\$?([\d,]+)k?(?:-|\s+to\s+)?([\d,]+)?k?/i);
-                const minSalary = salaryMatch ? parseInt(salaryMatch[1].replace(/,/g, '')) * (salaryMatch[1].includes('k') ? 1000 : 1) : 100000;
-                const maxSalary = salaryMatch && salaryMatch[2] ? parseInt(salaryMatch[2].replace(/,/g, '')) * 1000 : minSalary + 40000;
-
-                originalResponse = `Job posting: ${jobTitle} at ${company}
-Location: Remote
-Salary: $${minSalary.toLocaleString()} - $${maxSalary.toLocaleString()}
-Requirements: Technical skills, ${5}+ years experience
-Type: Full-time position`;
-
-                optimizedResponse = JSON.stringify({
-                    job_title: jobTitle,
-                    company: company,
-                    location: { city: "Remote", work_type: "remote" },
-                    salary_range: { min: minSalary, max: maxSalary, currency: "USD" },
-                    requirements: ["Technical skills", "Experience"],
-                    experience_years: 5
-                }, null, 2);
-
-            } else if (isSentimentTask) {
-                // Sentiment analysis
-                const isPositive = q.toLowerCase().includes('great') || q.toLowerCase().includes('excellent') || q.toLowerCase().includes('outstanding') || q.toLowerCase().includes('exceeded');
-                const isNegative = q.toLowerCase().includes('disappointed') || q.toLowerCase().includes('bad') || q.toLowerCase().includes('poor') || q.toLowerCase().includes('unhelpful');
-
-                originalResponse = `Review sentiment: ${isPositive ? 'POSITIVE' : isNegative ? 'NEGATIVE' : 'NEUTRAL'}
-Confidence: ${isPositive || isNegative ? '92%' : '65%'}
-Key phrases: ${isPositive ? 'excellent, satisfied' : isNegative ? 'disappointed, poor' : 'okay, acceptable'}
-Recommended action: ${isPositive ? 'Share as testimonial' : isNegative ? 'Urgent follow-up needed' : 'Monitor for updates'}`;
-
-                optimizedResponse = JSON.stringify({
-                    sentiment: isPositive ? "positive" : isNegative ? "negative" : "neutral",
-                    confidence: isPositive || isNegative ? 0.92 : 0.65,
-                    key_phrases: isPositive ? ["excellent", "satisfied"] : isNegative ? ["disappointed", "poor"] : ["okay"],
-                    recommended_action: isPositive ? "share_review" : isNegative ? "urgent_followup" : "monitor"
-                }, null, 2);
-
-            } else if (isInvoiceTask) {
-                // Invoice parsing
-                const invoiceMatch = q.match(/#?([A-Z]+-?\d+)/);
-                const invoiceNum = invoiceMatch ? invoiceMatch[1] : "INV-001";
-                const amountMatch = q.match(/\$?(\d+)/);
-                const total = amountMatch ? parseInt(amountMatch[1]) : 100;
-
-                originalResponse = `Invoice: ${invoiceNum}
-Date: 2024-12-01
-Vendor: Vendor Co.
-Total: $${total}.00
-Line items: 1 item
-Status: Pending payment`;
-
-                optimizedResponse = JSON.stringify({
-                    invoice_number: invoiceNum,
-                    date: "2024-12-01",
-                    total_amount: total,
-                    vendor_name: "Vendor Co.",
-                    line_items: [{ item: "Product/Service", quantity: 1, price: total }]
-                }, null, 2);
-
-            } else {
-                // Default: Product extraction
-                const priceMatch = q.match(/\$?([\d.]+)/);
-                const price = priceMatch ? parseFloat(priceMatch[1]) : 49.99;
-                const nameMatch = q.match(/^([^-.]+)/);
-                const productName = nameMatch ? nameMatch[1].trim() : "Product";
-
-                const features = [];
-                if (q.toLowerCase().includes('wireless')) features.push('Wireless connectivity');
-                if (q.toLowerCase().includes('bluetooth')) features.push('Bluetooth enabled');
-                if (q.toLowerCase().includes('battery')) features.push('Long battery life');
-                if (features.length === 0) features.push('Premium quality', 'Durable design');
-
-                let category = 'Electronics';
-                if (q.toLowerCase().includes('headphone')) category = 'Audio';
-                if (q.toLowerCase().includes('light') || q.toLowerCase().includes('bulb')) category = 'Lighting';
-
-                originalResponse = `Product: ${productName}
-Price: $${price}
-Category: ${category}
-Features: ${features.join(', ')}`;
-
-                optimizedResponse = JSON.stringify({
-                    product_name: productName,
-                    price: price,
-                    category: category,
-                    features: features
-                }, null, 2);
-            }
-
-            return {
-                query: q,
-                originalResponse: {
-                    text: originalResponse,
-                    tokens: Math.round(baseTokens),
-                    latency: baseLatency,
-                },
-                optimizedResponse: {
-                    text: optimizedResponse,
-                    tokens: optimizedTokens,
-                    latency: optimizedLatency,
-                },
-            };
-        });
-
-        // Generate a fake optimized prompt
-        const fakeOptimizedPrompt = systemPrompt
-            .replace(/You are a helpful assistant that extracts/, "Extract")
-            .replace(/Return the data as valid JSON./, "Return only valid JSON. No markdown.")
-            + "\n\nFocus on brevity and strict schema adherence.";
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
         const newTask = {
             id: `task-${Date.now()}`,
-            name: taskName || "Untitled Task",
+            name: taskName,
             status: "queued",
-            score: null as number | null,
+            score: null,
             progress: 0,
             createdAt: new Date().toISOString(),
-            completedAt: null as string | null,
-            model,
-            objective,
-            systemPrompt,
-            originalPrompt: systemPrompt,
-            optimizedPrompt: fakeOptimizedPrompt,
-            jsonSchema,
-            sampleQueries: cleanedQueries,
-            groundTruth,
-            sampleResults: fakeSampleResults,
-            metrics: {
-                successRate: 98.5,
-                costPerToken: 0.00003,
-            }
+            model: model === "gpt-4" ? "GPT-4" : "GPT-3.5 Turbo"
         };
 
-        try {
-            const existing = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('tasks') || '[]') : [];
-            const next = [newTask, ...existing.filter((t: any) => t.id !== newTask.id)];
-            if (typeof window !== 'undefined') localStorage.setItem('tasks', JSON.stringify(next));
-            setTasks(prev => [newTask, ...prev]);
-        } catch { }
+        const updatedTasks = [newTask, ...tasks];
+        setTasks(updatedTasks);
 
-        await new Promise(resolve => setTimeout(resolve, 600));
+        // Save to localStorage for persistence across pages
+        if (typeof window !== 'undefined') {
+            const existingTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+            localStorage.setItem('tasks', JSON.stringify([newTask, ...existingTasks]));
+        }
 
         setIsSubmitting(false);
         router.push(`/task/${newTask.id}`);
     };
 
-    useEffect(() => {
-        try {
-            const stored = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('tasks') || '[]') : [];
-            if (Array.isArray(stored) && stored.length) {
-                const merged = [...stored, ...seedTasks.filter(t => !stored.find((s: any) => s.id === t.id))];
-                setTasks(merged);
-            }
-        } catch { }
-    }, []);
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setTasks(prev => {
-                const updated = prev.map(task => {
-                    if (task.status === "failed" || task.status === "validated") return task;
-
-                    let progress = typeof task.progress === "number" ? task.progress : 0;
-                    let status = task.status;
-
-                    if (status === "queued") {
-                        progress = Math.min(progress + 20, 40);
-                        if (progress >= 20) status = "optimizing";
-                    } else if (status === "optimizing") {
-                        progress = Math.min(progress + 25, 100);
-                        if (progress >= 100) {
-                            progress = 100;
-                            status = "validated";
-                        }
-                    }
-
-                    // Generate score when validated
-                    let score = task.score;
-                    if (status === "validated" && score === null) {
-                        score = Math.round(88 + Math.random() * 10); // Random score between 88-98
-                    }
-
-                    return { ...task, progress, status, score };
-                });
-
-                try {
-                    if (typeof window !== 'undefined') {
-                        localStorage.setItem('tasks', JSON.stringify(updated));
-                    }
-                } catch { }
-
-                return updated;
-            });
-        }, 500);
-
-        return () => clearInterval(interval);
-    }, []);
-
     const loadExample = () => {
-        const templates = [
-            {
-                taskName: "E-commerce Product Extractor",
-                systemPrompt: `Extract structured product data from descriptions.
-
-Required fields:
-- product_name (string)
-- price (number)
-- category (string)
-- features (array of strings)
-
-Return valid JSON only.`,
-                jsonSchema: `{
-  "type": "object",
-  "properties": {
-    "product_name": { "type": "string" },
-    "price": { "type": "number" },
-    "category": { "type": "string" },
-    "features": {
-      "type": "array",
-      "items": { "type": "string" }
-    }
-  },
-  "required": ["product_name", "price", "category"]
-}`,
-                sampleQueries: [
-                    "Wireless Bluetooth Headphones - Premium sound with ANC. 30h battery. $89.99",
-                    "Smart LED Bulb - WiFi enabled, 16M colors. Works with Alexa. $24.99"
-                ],
-                groundTruth: `{
-  "product_name": "Wireless Bluetooth Headphones",
-  "price": 89.99,
-  "category": "Audio",
-  "features": ["ANC", "30h Battery", "Wireless"]
-}`
-            },
-            {
-                taskName: "Customer Sentiment Analyzer",
-                systemPrompt: `Analyze customer reviews and extract sentiment data.
-
-Extract:
-- sentiment (positive/negative/neutral)
-- confidence (0-1)
-- key_phrases (array)
-- recommended_action (string)
-
-Format as JSON.`,
-                jsonSchema: `{
-  "type": "object",
-  "properties": {
-    "sentiment": {
-      "type": "string",
-      "enum": ["positive", "negative", "neutral"]
-    },
-    "confidence": {
-      "type": "number",
-      "minimum": 0,
-      "maximum": 1
-    },
-    "key_phrases": {
-      "type": "array",
-      "items": { "type": "string" }
-    },
-    "recommended_action": { "type": "string" }
-  },
-  "required": ["sentiment", "confidence"]
-}`,
-                sampleQueries: [
-                    "This product exceeded my expectations! The quality is outstanding and delivery was fast.",
-                    "Very disappointed. Item arrived damaged and customer service was unhelpful."
-                ],
-                groundTruth: `{
-  "sentiment": "positive",
-  "confidence": 0.95,
-  "key_phrases": ["exceeded expectations", "outstanding quality"],
-  "recommended_action": "share_review"
-}`
-            },
-            {
-                taskName: "Invoice Data Parser",
-                systemPrompt: `Parse invoice text and extract billing information.
-
-Fields to extract:
-- invoice_number
-- date (YYYY-MM-DD)
-- total_amount
-- vendor_name
-- line_items (array with item, quantity, price)
-
-Return strict JSON.`,
-                jsonSchema: `{
-  "type": "object",
-  "properties": {
-    "invoice_number": { "type": "string" },
-    "date": { "type": "string", "format": "date" },
-    "total_amount": { "type": "number" },
-    "vendor_name": { "type": "string" },
-    "line_items": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "item": { "type": "string" },
-          "quantity": { "type": "integer" },
-          "price": { "type": "number" }
-        }
-      }
-    }
-  },
-  "required": ["invoice_number", "total_amount", "vendor_name"]
-}`,
-                sampleQueries: [
-                    "Invoice #INV-2024-001 from TechSupply Co. Date: 2024-12-01. Items: Laptop x1 $999, Mouse x3 $15 each. Total: $1044",
-                    "Bill from Office Depot. Invoice: OD-5432. 2024-11-28. Paper (5 reams) $50, Pens (2 boxes) $12. Total $62"
-                ],
-                groundTruth: `{
-  "invoice_number": "INV-2024-001",
-  "date": "2024-12-01",
-  "total_amount": 1044,
-  "vendor_name": "TechSupply Co.",
-  "line_items": [
-    {"item": "Laptop", "quantity": 1, "price": 999},
-    {"item": "Mouse", "quantity": 3, "price": 15}
-  ]
-}`
-            },
-            {
-                taskName: "Email Intent Classifier",
-                systemPrompt: `Classify email intent and extract key information.
-
-Determine:
-- intent (support_request/sales_inquiry/complaint/feedback)
-- priority (low/medium/high/urgent)
-- subject_category
-- requires_response (boolean)
-
-Output JSON only.`,
-                jsonSchema: `{
-  "type": "object",
-  "properties": {
-    "intent": {
-      "type": "string",
-      "enum": ["support_request", "sales_inquiry", "complaint", "feedback"]
-    },
-    "priority": {
-      "type": "string",
-      "enum": ["low", "medium", "high", "urgent"]
-    },
-    "subject_category": { "type": "string" },
-    "requires_response": { "type": "boolean" }
-  },
-  "required": ["intent", "priority", "requires_response"]
-}`,
-                sampleQueries: [
-                    "Hi, I'm interested in your enterprise pricing. Can you send me a quote for 50 users?",
-                    "URGENT: My account has been locked for 3 hours. I need immediate assistance!"
-                ],
-                groundTruth: `{
-  "intent": "sales_inquiry",
-  "priority": "medium",
-  "subject_category": "Enterprise Pricing",
-  "requires_response": true
-}`
-            },
-            {
-                taskName: "Job Posting Extractor",
-                systemPrompt: `Extract structured data from job postings.
-
-Parse:
-- job_title
-- company
-- location (city, remote/hybrid/onsite)
-- salary_range (min, max, currency)
-- requirements (array)
-- experience_years
-
-JSON format required.`,
-                jsonSchema: `{
-  "type": "object",
-  "properties": {
-    "job_title": { "type": "string" },
-    "company": { "type": "string" },
-    "location": {
-      "type": "object",
-      "properties": {
-        "city": { "type": "string" },
-        "work_type": {
-          "type": "string",
-          "enum": ["remote", "hybrid", "onsite"]
-        }
-      }
-    },
-    "salary_range": {
-      "type": "object",
-      "properties": {
-        "min": { "type": "number" },
-        "max": { "type": "number" },
-        "currency": { "type": "string" }
-      }
-    },
-    "requirements": {
-      "type": "array",
-      "items": { "type": "string" }
-    },
-    "experience_years": { "type": "integer" }
-  },
-  "required": ["job_title", "company"]
-}`,
-                sampleQueries: [
-                    "Senior Full Stack Developer at TechCorp. Remote position. $120k-160k. Requirements: React, Node.js, 5+ years experience.",
-                    "Marketing Manager - NYC (Hybrid). $80-100K. Must have: 3+ years marketing, SEO expertise, team leadership."
-                ],
-                groundTruth: `{
-  "job_title": "Senior Full Stack Developer",
-  "company": "TechCorp",
-  "location": {"city": "Remote", "work_type": "remote"},
-  "salary_range": {"min": 120000, "max": 160000, "currency": "USD"},
-  "requirements": ["React", "Node.js"],
-  "experience_years": 5
-}`
-            }
-        ];
-
-        const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
-
-        setTaskName(randomTemplate.taskName);
-        setSystemPrompt(randomTemplate.systemPrompt);
-        setJsonSchema(randomTemplate.jsonSchema);
-        setSampleQueries(randomTemplate.sampleQueries);
-        setGroundTruth(randomTemplate.groundTruth);
+        setTaskName(exampleTemplate.taskName);
+        setSystemPrompt(exampleTemplate.systemPrompt);
+        setJsonSchema(exampleTemplate.jsonSchema);
+        setSampleQueries(exampleTemplate.sampleQueries);
+        setGroundTruth(exampleTemplate.groundTruth);
     };
 
-    const addSampleQuery = () => {
+    const addQuery = () => {
         setSampleQueries([...sampleQueries, ""]);
     };
 
-    const removeSampleQuery = (index: number) => {
-        if (sampleQueries.length > 1) {
-            setSampleQueries(sampleQueries.filter((_, i) => i !== index));
-        }
-    };
-
-    const updateSampleQuery = (index: number, value: string) => {
+    const updateQuery = (index: number, value: string) => {
         const newQueries = [...sampleQueries];
         newQueries[index] = value;
         setSampleQueries(newQueries);
     };
 
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black text-white pt-24 pb-16">
-            <div className="container mx-auto px-6 max-w-7xl">
+    const removeQuery = (index: number) => {
+        const newQueries = sampleQueries.filter((_, i) => i !== index);
+        setSampleQueries(newQueries);
+    };
 
+    return (
+        <div className="min-h-screen relative bg-zinc-50/50">
+            <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
                 {/* Header */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-12"
+                    className="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-zinc-200 pb-6"
                 >
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                            <Zap className="w-10 h-10 text-blue-400" />
-                            <h1 className="text-5xl font-bold tracking-tight">
-                                Optimize
-                            </h1>
+                    <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-primary mb-1 tracking-widest uppercase">
+                            <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                            Workspace / Optimize
                         </div>
+                        <h1 className="text-3xl font-bold tracking-tight text-zinc-900 flex items-center gap-3">
+                            <QuantumText text="NEW_OPTIMIZATION" />
+                        </h1>
+                        <p className="text-zinc-500 text-xs max-w-xl font-mono mt-1">
+                            Configure and launch a new prompt optimization task.
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3 mt-4 md:mt-0">
                         <Button
-                            onClick={loadExample}
                             variant="outline"
-                            className="border-blue-500 text-blue-400 hover:bg-blue-500/10 flex items-center gap-2"
+                            onClick={loadExample}
+                            className="h-9 px-4 bg-white hover:bg-zinc-50 text-zinc-700 border-zinc-200 font-mono text-[10px] uppercase tracking-wider"
                         >
-                            <Lightbulb className="w-4 h-4" />
-                            Try Example
+                            <Lightbulb className="w-3 h-3 mr-2 text-amber-500" />
+                            Load_Example
                         </Button>
                     </div>
-                    <p className="text-gray-400 text-lg">
-                        Submit optimization tasks and track your submissions
-                    </p>
                 </motion.div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Main Form */}
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="lg:col-span-8 space-y-6"
+                    >
+                        <form onSubmit={handleSubmit}>
+                            <DataModule
+                                className="bg-white/80 backdrop-blur-sm border-zinc-200/60"
+                                contentClassName="p-6 space-y-8"
+                            >
 
-                    {/* Submit Form */}
-                    <div className="lg:col-span-2">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 }}
-                            className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-xl p-6"
-                        >
-                            <div className="flex items-center gap-2 mb-6">
-                                <Send className="w-5 h-5 text-blue-400" />
-                                <h2 className="text-xl font-bold">New Optimization Task</h2>
-                            </div>
+                                {/* Task Details */}
+                                <div className="space-y-6">
+                                    <div className="flex items-center gap-2 text-xs font-bold text-zinc-900 uppercase tracking-wider font-mono">
+                                        <Target className="w-4 h-4 text-primary" />
+                                        Task_Configuration
+                                    </div>
 
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                {/* Task Name */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="taskName" className="text-gray-300 font-medium">Task Name</Label>
-                                    <Input
-                                        id="taskName"
-                                        placeholder="e.g., E-commerce Product Parser"
-                                        value={taskName}
-                                        onChange={(e) => setTaskName(e.target.value)}
-                                        className="bg-gray-800/50 border-gray-700 focus:border-blue-500 text-white placeholder:text-gray-500"
-                                        required
-                                    />
-                                </div>
+                                    <div className="grid gap-6">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="taskName" className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Task Name</Label>
+                                            <Input
+                                                id="taskName"
+                                                placeholder="e.g., E-commerce Product Parser"
+                                                value={taskName}
+                                                onChange={(e) => setTaskName(e.target.value)}
+                                                className="bg-zinc-50 border-zinc-200 focus:border-primary/50 font-mono text-sm h-10"
+                                                required
+                                            />
+                                        </div>
 
-                                {/* Objective Function */}
-                                <div className="space-y-2">
-                                    <Label className="text-gray-300 font-medium">Optimization Objective</Label>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {[
-                                            { value: "token_efficiency", label: "Token Efficiency", icon: Battery, desc: "Minimize tokens" },
-                                            { value: "latency", label: "Speed", icon: Gauge, desc: "Reduce latency" },
-                                            { value: "accuracy", label: "Accuracy", icon: Target, desc: "Better results" },
-                                            { value: "balanced", label: "Balanced", icon: BarChart3, desc: "All three" },
-                                        ].map((opt) => {
-                                            const Icon = opt.icon;
-                                            return (
-                                                <button
-                                                    key={opt.value}
-                                                    type="button"
-                                                    onClick={() => setObjective(opt.value)}
-                                                    className={`p-3 rounded-lg border-2 transition-all text-left ${objective === opt.value
-                                                        ? "border-blue-500 bg-blue-500/10"
-                                                        : "border-gray-700 hover:border-gray-600 bg-gray-800/30"
-                                                        }`}
-                                                >
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <Icon className={`w-4 h-4 ${objective === opt.value ? "text-blue-400" : "text-gray-400"}`} />
-                                                        <span className={`font-semibold text-sm ${objective === opt.value ? "text-blue-400" : "text-gray-300"}`}>
-                                                            {opt.label}
-                                                        </span>
+                                        <div className="space-y-2">
+                                            <Label className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Optimization Objective</Label>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                {[
+                                                    { id: "token_efficiency", label: "Token Efficiency", icon: Battery, desc: "Minimize tokens" },
+                                                    { id: "speed", label: "Speed", icon: Zap, desc: "Reduce latency" },
+                                                    { id: "balanced", label: "Balanced", icon: Gauge, desc: "All three" },
+                                                ].map((obj) => (
+                                                    <div
+                                                        key={obj.id}
+                                                        onClick={() => setObjective(obj.id)}
+                                                        className={`cursor-pointer p-3 rounded-lg border transition-all duration-200 ${objective === obj.id
+                                                            ? "bg-primary/5 border-primary ring-1 ring-primary/20"
+                                                            : "bg-zinc-50 border-zinc-200 hover:border-primary/30 hover:bg-zinc-100"
+                                                            }`}
+                                                    >
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <obj.icon className={`w-3.5 h-3.5 ${objective === obj.id ? "text-primary" : "text-zinc-400"}`} />
+                                                            <span className={`text-xs font-bold ${objective === obj.id ? "text-primary" : "text-zinc-700"}`}>
+                                                                {obj.label}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-[10px] text-zinc-500 font-mono">{obj.desc}</p>
                                                     </div>
-                                                    <p className="text-xs text-gray-500">{opt.desc}</p>
-                                                </button>
-                                            );
-                                        })}
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+
+                                <div className="h-px bg-zinc-100" />
 
                                 {/* System Prompt */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="systemPrompt" className="text-gray-300 font-medium">System Prompt</Label>
-                                    <Textarea
-                                        id="systemPrompt"
-                                        placeholder="Enter your current system prompt here..."
-                                        className="min-h-[150px] font-mono text-sm bg-gray-800/50 border-gray-700 focus:border-blue-500 text-white placeholder:text-gray-500"
-                                        value={systemPrompt}
-                                        onChange={(e) => setSystemPrompt(e.target.value)}
-                                        required
-                                    />
-                                </div>
-
-                                {/* JSON Schema */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="jsonSchema" className="text-gray-300 font-medium">Expected JSON Schema</Label>
-                                    <div className="border border-gray-700 rounded-lg overflow-hidden">
-                                        <MonacoEditor
-                                            height="200px"
-                                            defaultLanguage="json"
-                                            theme="vs-dark"
-                                            value={jsonSchema}
-                                            onChange={(value) => {
-                                                const next = value || "{}";
-                                                setJsonSchema(next);
-                                                try {
-                                                    JSON.parse(next);
-                                                    setSchemaError(null);
-                                                } catch (err: any) {
-                                                    setSchemaError("Invalid JSON schema");
-                                                }
-                                            }}
-                                            options={{
-                                                minimap: { enabled: false },
-                                                fontSize: 13,
-                                                lineNumbers: "on",
-                                                scrollBeyondLastLine: false,
-                                                fontFamily: "monospace",
-                                            }}
+                                <div className="space-y-6">
+                                    <div className="flex items-center gap-2 text-xs font-bold text-zinc-900 uppercase tracking-wider font-mono">
+                                        <Terminal className="w-4 h-4 text-primary" />
+                                        System_Prompt
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="systemPrompt" className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Initial Prompt</Label>
+                                        <Textarea
+                                            id="systemPrompt"
+                                            placeholder="Enter your current system prompt here..."
+                                            value={systemPrompt}
+                                            onChange={(e) => setSystemPrompt(e.target.value)}
+                                            className="min-h-[150px] font-mono text-xs bg-zinc-50 border-zinc-200 focus:border-primary/50"
+                                            required
                                         />
                                     </div>
-                                    {schemaError && (
-                                        <p className="text-xs text-red-400 mt-1">{schemaError}</p>
-                                    )}
                                 </div>
 
-                                {/* Sample Queries */}
-                                <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <Label className="text-gray-300 font-medium">Sample Queries</Label>
+                                <div className="h-px bg-zinc-100" />
+
+                                {/* Data Configuration */}
+                                <div className="space-y-6">
+                                    <div className="flex items-center gap-2 text-xs font-bold text-zinc-900 uppercase tracking-wider font-mono">
+                                        <BarChart3 className="w-4 h-4 text-primary" />
+                                        Data_Config
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <Label className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">JSON Schema</Label>
+                                            <div className="h-[200px] border border-zinc-200 rounded-md overflow-hidden bg-zinc-50">
+                                                <MonacoEditor
+                                                    height="100%"
+                                                    language="json"
+                                                    theme="light"
+                                                    value={jsonSchema}
+                                                    onChange={(value) => setJsonSchema(value || "")}
+                                                    options={{
+                                                        minimap: { enabled: false },
+                                                        fontSize: 12,
+                                                        lineNumbers: "off",
+                                                        scrollBeyondLastLine: false,
+                                                        automaticLayout: true,
+                                                        padding: { top: 10, bottom: 10 },
+                                                        fontFamily: "monospace"
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Ground Truth (Optional)</Label>
+                                            <div className="h-[200px] border border-zinc-200 rounded-md overflow-hidden bg-zinc-50">
+                                                <MonacoEditor
+                                                    height="100%"
+                                                    language="json"
+                                                    theme="light"
+                                                    value={groundTruth}
+                                                    onChange={(value) => setGroundTruth(value || "")}
+                                                    options={{
+                                                        minimap: { enabled: false },
+                                                        fontSize: 12,
+                                                        lineNumbers: "off",
+                                                        scrollBeyondLastLine: false,
+                                                        automaticLayout: true,
+                                                        padding: { top: 10, bottom: 10 },
+                                                        fontFamily: "monospace"
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <Label className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Sample Queries</Label>
+                                        {sampleQueries.map((query, index) => (
+                                            <div key={index} className="flex gap-2">
+                                                <Input
+                                                    value={query}
+                                                    onChange={(e) => updateQuery(index, e.target.value)}
+                                                    placeholder={`Example query ${index + 1}`}
+                                                    className="font-mono text-xs bg-zinc-50 border-zinc-200 focus:border-primary/50"
+                                                />
+                                                {sampleQueries.length > 1 && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => removeQuery(index)}
+                                                        className="text-zinc-400 hover:text-red-500 hover:bg-red-50"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        ))}
                                         <Button
                                             type="button"
+                                            variant="outline"
                                             size="sm"
-                                            variant="ghost"
-                                            onClick={addSampleQuery}
-                                            className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+                                            onClick={addQuery}
+                                            className="text-xs font-mono border-dashed border-zinc-300 text-zinc-500 hover:text-primary hover:border-primary/50"
                                         >
-                                            <Plus className="w-4 h-4 mr-1" />
-                                            Add Query
+                                            <Plus className="w-3 h-3 mr-2" />
+                                            Add_Query
                                         </Button>
                                     </div>
-                                    <div className="space-y-3">
-                                        <AnimatePresence>
-                                            {sampleQueries.map((query, index) => (
-                                                <motion.div
-                                                    key={index}
-                                                    initial={{ opacity: 0, height: 0 }}
-                                                    animate={{ opacity: 1, height: "auto" }}
-                                                    exit={{ opacity: 0, height: 0 }}
-                                                    className="flex gap-2"
+                                </div>
+
+                                <div className="pt-4 flex justify-end">
+                                    <Button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 font-mono text-xs uppercase tracking-wider h-10 px-6"
+                                    >
+                                        {isSubmitting ? (
+                                            <>
+                                                <Activity className="w-4 h-4 mr-2 animate-spin" />
+                                                INITIALIZING...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Sparkles className="w-4 h-4 mr-2" />
+                                                START_OPTIMIZATION
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
+                            </DataModule>
+                        </form>
+                    </motion.div>
+
+                    {/* Sidebar */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="lg:col-span-4 space-y-6"
+                    >
+                        <DataModule className="p-0 bg-white/80 backdrop-blur-sm border-zinc-200/60 overflow-hidden">
+                            <div className="p-4 border-b border-zinc-100 bg-zinc-50/50">
+                                <h3 className="text-xs font-bold text-zinc-900 uppercase tracking-wider font-mono flex items-center gap-2">
+                                    <Activity className="w-4 h-4 text-primary" />
+                                    Recent_Activity
+                                </h3>
+                            </div>
+                            <div className="divide-y divide-zinc-100">
+                                {tasks.map((task) => (
+                                    <Link key={task.id} href={`/task/${task.id}`}>
+                                        <div className="p-4 hover:bg-zinc-50 transition-colors group">
+                                            <div className="flex items-start justify-between mb-2">
+                                                <TechBadge
+                                                    variant={
+                                                        task.status === "validated" ? "success" :
+                                                            task.status === "failed" ? "danger" :
+                                                                task.status === "optimizing" ? "default" : "neutral"
+                                                    }
+                                                    animate={task.status === "optimizing"}
+                                                    className="scale-90 origin-top-left"
                                                 >
-                                                    <Textarea
-                                                        placeholder={`Sample query ${index + 1}...`}
-                                                        className="min-h-[80px] font-mono text-sm bg-gray-800/50 border-gray-700 focus:border-blue-500 text-white placeholder:text-gray-500 flex-1"
-                                                        value={query}
-                                                        onChange={(e) => updateSampleQuery(index, e.target.value)}
-                                                        required
-                                                    />
-                                                    {sampleQueries.length > 1 && (
-                                                        <Button
-                                                            type="button"
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={() => removeSampleQuery(index)}
-                                                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-10 px-2"
-                                                        >
-                                                            <X className="w-4 h-4" />
-                                                        </Button>
-                                                    )}
-                                                </motion.div>
-                                            ))}
-                                        </AnimatePresence>
-                                    </div>
-                                </div>
-
-                                {/* Ground Truth */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="groundTruth" className="text-gray-300 font-medium">
-                                        Ground Truth (Optional)
-                                        <span className="text-xs text-gray-500 ml-2">For validation scoring</span>
-                                    </Label>
-                                    <div className="border border-gray-700 rounded-lg overflow-hidden">
-                                        <MonacoEditor
-                                            height="150px"
-                                            defaultLanguage="json"
-                                            theme="vs-dark"
-                                            value={groundTruth}
-                                            onChange={(value) => {
-                                                const next = value || "{}";
-                                                setGroundTruth(next);
-
-                                                const trimmed = next.trim();
-                                                if (!trimmed) {
-                                                    setGroundTruthError(null);
-                                                    return;
-                                                }
-
-                                                try {
-                                                    JSON.parse(next);
-                                                    setGroundTruthError(null);
-                                                } catch (err: any) {
-                                                    setGroundTruthError("Invalid ground truth JSON");
-                                                }
-                                            }}
-                                            options={{
-                                                minimap: { enabled: false },
-                                                fontSize: 13,
-                                                lineNumbers: "on",
-                                                scrollBeyondLastLine: false,
-                                                fontFamily: "monospace",
-                                            }}
-                                        />
-                                    </div>
-                                    {groundTruthError && (
-                                        <p className="text-xs text-red-400 mt-1">{groundTruthError}</p>
-                                    )}
-                                </div>
-
-                                {/* Target Model */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="model" className="text-gray-300 font-medium">Target Model</Label>
-                                    <Select value={model} onValueChange={setModel}>
-                                        <SelectTrigger id="model" className="bg-gray-800/50 border-gray-700 text-white">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-gray-800 border-gray-700">
-                                            <SelectItem value="gpt-4">GPT-4</SelectItem>
-                                            <SelectItem value="gpt-4-turbo">GPT-4 Turbo</SelectItem>
-                                            <SelectItem value="claude-3-opus">Claude 3 Opus</SelectItem>
-                                            <SelectItem value="claude-3-sonnet">Claude 3 Sonnet</SelectItem>
-                                            <SelectItem value="gemini-pro">Gemini Pro</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                {/* Submit Button */}
-                                <Button
-                                    type="submit"
-                                    disabled={isSubmitting || !!schemaError || !!groundTruthError}
-                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 text-base font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {isSubmitting ? (
-                                        <>
-                                            <Sparkles className="w-4 h-4 animate-spin" />
-                                            Submitting Task...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Send className="w-4 h-4" />
-                                            Submit Task
-                                        </>
-                                    )}
-                                </Button>
-                            </form>
-                        </motion.div>
-                    </div>
-
-                    {/* My Tasks Sidebar */}
-                    <div>
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-xl p-6"
-                        >
-                            <div className="flex items-center gap-2 mb-6">
-                                <Activity className="w-5 h-5 text-purple-400" />
-                                <h2 className="text-xl font-bold">My Tasks</h2>
-                            </div>
-
-                            <div className="space-y-3">
-                                {tasks.length === 0 && (
-                                    <div className="p-6 text-center text-gray-400 bg-gray-800/30 border border-gray-700/50 rounded-lg">
-                                        No tasks yet. <Link href="/optimize" className="text-blue-400 hover:underline">Create your first task</Link>.
-                                    </div>
-                                )}
-                                {tasks.map((task) => {
-                                    const statusStyle = statusConfig[task.status as keyof typeof statusConfig];
-                                    const StatusIcon = statusStyle.icon;
-
-                                    return (
-                                        <Link
-                                            key={task.id}
-                                            href={`/task/${task.id}`}
-                                            className="block group"
-                                        >
-                                            <div className="p-4 bg-gray-800/30 hover:bg-gray-800/60 border border-gray-700/50 hover:border-blue-500/50 rounded-lg transition-all cursor-pointer">
-                                                <div className="flex items-start justify-between mb-2">
-                                                    <h3 className="font-bold text-white text-sm group-hover:text-blue-400 transition-colors">
-                                                        {task.name}
-                                                    </h3>
-                                                    {task.score && (
-                                                        <span className="bg-green-500/10 text-green-400 px-2 py-0.5 rounded text-xs font-medium border border-green-500/30">
-                                                            {task.score}%
-                                                        </span>
-                                                    )}
-                                                </div>
-
-                                                {/* Progress Bar */}
-                                                {(task.status === "optimizing" || task.status === "queued") && (
-                                                    <div className="mb-3">
-                                                        <div className="flex justify-between text-xs text-gray-500 mb-1">
-                                                            <span>{task.status === "queued" ? "Waiting..." : "Optimizing..."}</span>
-                                                            <span>{task.progress}%</span>
-                                                        </div>
-                                                        <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                                                            <motion.div
-                                                                className={`h-full rounded-full ${task.status === "queued" ? "bg-yellow-500" : "bg-blue-500"}`}
-                                                                initial={{ width: 0 }}
-                                                                animate={{ width: `${task.progress}%` }}
-                                                                transition={{ duration: 0.5 }}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                <div className="flex items-center justify-between">
-                                                    <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md ${statusStyle.bg} ${statusStyle.color} border ${statusStyle.border}`}>
-                                                        <StatusIcon className="h-3 w-3" />
-                                                        {statusStyle.label}
-                                                    </div>
-                                                    <span className="text-xs font-mono text-gray-500">
-                                                        {new Date(task.createdAt).toLocaleDateString()}
-                                                    </span>
-                                                </div>
+                                                    {task.status}
+                                                </TechBadge>
+                                                <span className="text-[10px] text-zinc-400 font-mono">
+                                                    {new Date(task.createdAt).toLocaleDateString()}
+                                                </span>
                                             </div>
-                                        </Link>
-                                    );
-                                })}
+                                            <h4 className="text-sm font-bold text-zinc-900 mb-1 font-mono group-hover:text-primary transition-colors truncate">
+                                                {task.name}
+                                            </h4>
+                                            {task.score && (
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <div className="text-xs font-bold text-primary font-mono bg-primary/5 px-2 py-0.5 rounded">
+                                                        SCORE: {task.score}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {task.status === "optimizing" && (
+                                                <div className="mt-2 w-full bg-zinc-100 h-1 rounded-full overflow-hidden">
+                                                    <motion.div
+                                                        className="h-full bg-primary"
+                                                        initial={{ width: 0 }}
+                                                        animate={{ width: `${task.progress}%` }}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </Link>
+                                ))}
                             </div>
-                        </motion.div>
-                    </div>
+                            <div className="p-3 bg-zinc-50/50 border-t border-zinc-100 text-center">
+                                <Link href="/tasks" className="text-[10px] font-bold text-zinc-500 hover:text-primary transition-colors uppercase tracking-wider font-mono flex items-center justify-center gap-1">
+                                    View_All_Tasks
+                                    <ArrowRight className="w-3 h-3" />
+                                </Link>
+                            </div>
+                        </DataModule>
+
+                        <DataModule className="p-5 bg-gradient-to-br from-primary/5 to-transparent border-primary/10">
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 bg-white rounded-lg shadow-sm">
+                                    <Lightbulb className="w-5 h-5 text-primary" />
+                                </div>
+                                <div>
+                                    <h4 className="text-xs font-bold text-zinc-900 uppercase tracking-wider font-mono mb-1">
+                                        Pro_Tip
+                                    </h4>
+                                    <p className="text-xs text-zinc-600 leading-relaxed">
+                                        Providing a <span className="font-mono font-bold text-primary">Ground Truth</span> example significantly improves the accuracy of the optimization process by giving the model a clear target to aim for.
+                                    </p>
+                                </div>
+                            </div>
+                        </DataModule>
+                    </motion.div>
                 </div>
             </div>
         </div>

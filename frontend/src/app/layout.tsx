@@ -32,7 +32,7 @@ export default function RootLayout({
         className={`${outfit.variable} ${spaceMono.variable} antialiased bg-white text-black font-sans`}
       >
         <Header />
-        <main className="min-h-screen">{children}</main>
+        <main className="min-h-screen pt-16">{children}</main>
       </body>
     </html>
   );

@@ -38,13 +38,14 @@ export default function TasksPage() {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
+
     useEffect(() => {
         try {
-            // Clear localStorage tasks
+            // Load tasks from localStorage
             if (typeof window !== 'undefined') {
-                localStorage.removeItem('tasks');
+                const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+                setTasks(storedTasks);
             }
-            setTasks(userTasks);
         } catch { }
     }, []);
 

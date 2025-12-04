@@ -91,7 +91,7 @@ export default function OptimizePage() {
     const [model, setModel] = useState("gpt-4");
     const [objective, setObjective] = useState("balanced");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [tasks, setTasks] = useState(seedTasks);
+    const [tasks, setTasks] = useState<any[]>(seedTasks);
     const [schemaError, setSchemaError] = useState<string | null>(null);
     const [groundTruthError, setGroundTruthError] = useState<string | null>(null);
 
@@ -102,14 +102,59 @@ export default function OptimizePage() {
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 2000));
 
+        // Generate realistic optimization results
+        const score = Math.round(88 + Math.random() * 10); // 88-98
+        const tokenReductionPercent = Math.round(20 + Math.random() * 15); // 20-35%
+        const latencyReductionPercent = Math.round(15 + Math.random() * 15); // 15-30%
+
+        // Create optimized version of the prompt
+        const optimizedPrompt = systemPrompt +
+            "\n\nOutput Format: Return ONLY valid JSON without markdown formatting or additional text.";
+
+        // Generate sample results if sample queries exist
+        const sampleResults = sampleQueries.filter(q => q.trim()).map((query, idx) => {
+            const baseTokens = 35 + Math.floor(Math.random() * 15);
+            const baseLatency = 700 + Math.floor(Math.random() * 200);
+
+            return {
+                query: query,
+                originalResponse: {
+                    text: `Sample response for: ${query}`,
+                    tokens: baseTokens,
+                    latency: baseLatency
+                },
+                optimizedResponse: {
+                    text: `Optimized response for: ${query}`,
+                    tokens: Math.floor(baseTokens * (1 - tokenReductionPercent / 100)),
+                    latency: Math.floor(baseLatency * (1 - latencyReductionPercent / 100))
+                }
+            };
+        });
+
         const newTask = {
             id: `task-${Date.now()}`,
             name: taskName,
-            status: "queued",
-            score: null,
-            progress: 0,
-            createdAt: new Date().toISOString(),
-            model: model === "gpt-4" ? "GPT-4" : "GPT-3.5 Turbo"
+            status: "validated",
+            score: score,
+            progress: 100,
+            createdAt: new Date().toLocaleString(),
+            model: model === "gpt-4" ? "GPT-4 Turbo" : model === "claude-3" ? "Claude 3 Opus" : "GPT-3.5 Turbo",
+            tokenSavings: tokenReductionPercent,
+            latencySavings: latencyReductionPercent,
+            originalPrompt: systemPrompt,
+            optimizedPrompt: optimizedPrompt,
+            systemPrompt: systemPrompt,
+            jsonSchema: jsonSchema,
+            groundTruth: groundTruth,
+            sampleResults: sampleResults,
+            metrics: {
+                clarity: Math.round(85 + Math.random() * 10),
+                specificity: Math.round(82 + Math.random() * 12),
+                coherence: Math.round(87 + Math.random() * 10),
+                safety: 100,
+                engagement: Math.round(80 + Math.random() * 15),
+                complexity: Math.round(40 + Math.random() * 20)
+            }
         };
 
         const updatedTasks = [newTask, ...tasks];
@@ -147,6 +192,16 @@ export default function OptimizePage() {
         const newQueries = sampleQueries.filter((_, i) => i !== index);
         setSampleQueries(newQueries);
     };
+
+    useEffect(() => {
+        // Load tasks from localStorage on mount
+        if (typeof window !== 'undefined') {
+            const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+            if (storedTasks.length > 0) {
+                setTasks(storedTasks);
+            }
+        }
+    }, []);
 
     return (
         <div className="min-h-screen relative bg-zinc-50/50">
@@ -197,22 +252,38 @@ export default function OptimizePage() {
 
                                 {/* Task Details */}
                                 <div className="space-y-6">
-                                    <div className="flex items-center gap-2 text-xs font-bold text-zinc-900 uppercase tracking-wider font-mono">
+                                    <div className="flex items-center gap-2 px-6 py-4 bg-zinc-50/50 border-b border-zinc-100 -mx-6 -mt-6 mb-6">
                                         <Target className="w-4 h-4 text-primary" />
-                                        Task_Configuration
+                                        <span className="text-xs font-bold text-zinc-900 uppercase tracking-wider font-mono">Task_Configuration</span>
                                     </div>
 
                                     <div className="grid gap-6">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="taskName" className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Task Name</Label>
-                                            <Input
-                                                id="taskName"
-                                                placeholder="e.g., E-commerce Product Parser"
-                                                value={taskName}
-                                                onChange={(e) => setTaskName(e.target.value)}
-                                                className="bg-zinc-50 border-zinc-200 focus:border-primary/50 font-mono text-sm h-10"
-                                                required
-                                            />
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="taskName" className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Task Name</Label>
+                                                <Input
+                                                    id="taskName"
+                                                    placeholder="e.g., E-commerce Product Parser"
+                                                    value={taskName}
+                                                    onChange={(e) => setTaskName(e.target.value)}
+                                                    className="bg-zinc-50 border-zinc-200 focus:border-primary/50 font-mono text-sm h-10"
+                                                    required
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Model</Label>
+                                                <Select value={model} onValueChange={setModel}>
+                                                    <SelectTrigger className="bg-zinc-50 border-zinc-200 focus:border-primary/50 font-mono text-sm h-10">
+                                                        <SelectValue placeholder="Select Model" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="gpt-4">GPT-4 Turbo</SelectItem>
+                                                        <SelectItem value="gpt-3.5">GPT-3.5 Turbo</SelectItem>
+                                                        <SelectItem value="claude-3">Claude 3 Opus</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
                                         </div>
 
                                         <div className="space-y-2">
@@ -245,13 +316,11 @@ export default function OptimizePage() {
                                     </div>
                                 </div>
 
-                                <div className="h-px bg-zinc-100" />
-
                                 {/* System Prompt */}
                                 <div className="space-y-6">
-                                    <div className="flex items-center gap-2 text-xs font-bold text-zinc-900 uppercase tracking-wider font-mono">
+                                    <div className="flex items-center gap-2 px-6 py-4 bg-zinc-50/50 border-y border-zinc-100 -mx-6 mb-6">
                                         <Terminal className="w-4 h-4 text-primary" />
-                                        System_Prompt
+                                        <span className="text-xs font-bold text-zinc-900 uppercase tracking-wider font-mono">System_Prompt</span>
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="systemPrompt" className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Initial Prompt</Label>
@@ -266,13 +335,11 @@ export default function OptimizePage() {
                                     </div>
                                 </div>
 
-                                <div className="h-px bg-zinc-100" />
-
                                 {/* Data Configuration */}
                                 <div className="space-y-6">
-                                    <div className="flex items-center gap-2 text-xs font-bold text-zinc-900 uppercase tracking-wider font-mono">
+                                    <div className="flex items-center gap-2 px-6 py-4 bg-zinc-50/50 border-y border-zinc-100 -mx-6 mb-6">
                                         <BarChart3 className="w-4 h-4 text-primary" />
-                                        Data_Config
+                                        <span className="text-xs font-bold text-zinc-900 uppercase tracking-wider font-mono">Data_Config</span>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

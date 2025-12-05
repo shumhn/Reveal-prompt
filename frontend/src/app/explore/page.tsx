@@ -304,7 +304,11 @@ export default function ExplorePage() {
                         {/* Table Body */}
                         <div className="divide-y divide-zinc-100/80">
                             {filteredWinners.map((miner, index) => (
-                                <div key={index} className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-white/80 transition-all items-center group">
+                                <Link
+                                    key={index}
+                                    href={`/miner/${miner.name.toLowerCase()}-${miner.version.toLowerCase()}`}
+                                    className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-primary/5 transition-all items-center group cursor-pointer"
+                                >
                                     <div className="col-span-1">
                                         <span className={`text-sm font-bold ${index === 0 ? 'text-amber-500' : index === 1 ? 'text-zinc-400' : index === 2 ? 'text-amber-700' : 'text-zinc-300'}`}>
                                             {index + 1}
@@ -336,9 +340,10 @@ export default function ExplorePage() {
                                             <span className="text-sm font-bold text-primary font-mono">
                                                 {((miner.wins / miner.attempts) * 100).toFixed(1)}%
                                             </span>
+                                            <ArrowRight className="w-4 h-4 text-zinc-300 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                                         </div>
                                     </div>
-                                </div>
+                                </Link>
                             ))}
                             {filteredWinners.length === 0 && (
                                 <div className="p-8 text-center text-sm text-zinc-400 font-medium">

@@ -114,7 +114,7 @@ export default function ExplorePage() {
                 </motion.div>
 
                 {/* Key Metrics Grid - Top Row */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                         <DataModule className="p-5 bg-white/60 backdrop-blur-xl border-zinc-200/60 shadow-sm hover:shadow-md transition-all duration-300">
                             <div className="flex items-center justify-between mb-4">
@@ -156,6 +156,21 @@ export default function ExplorePage() {
                             <div className="text-3xl font-bold text-emerald-600 tracking-tight font-mono">$65k</div>
                             <div className="mt-3 h-1 w-full bg-zinc-100 rounded-full overflow-hidden">
                                 <div className="h-full bg-emerald-500 w-[85%] rounded-full" />
+                            </div>
+                        </DataModule>
+                    </motion.div>
+
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+                        <DataModule className="p-5 bg-white/60 backdrop-blur-xl border-zinc-200/60 shadow-sm hover:shadow-md transition-all duration-300">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                                    <Award className="w-3.5 h-3.5" /> Daily Reward
+                                </div>
+                                <span className="text-[10px] font-mono text-zinc-400">τ</span>
+                            </div>
+                            <div className="text-3xl font-bold text-amber-600 tracking-tight font-mono">847.5</div>
+                            <div className="mt-3 h-1 w-full bg-zinc-100 rounded-full overflow-hidden">
+                                <div className="h-full bg-amber-500 w-[92%] rounded-full" />
                             </div>
                         </DataModule>
                     </motion.div>

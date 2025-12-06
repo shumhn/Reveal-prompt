@@ -194,7 +194,7 @@ export default function HomePage() {
                                 size="lg"
                                 className="h-14 px-8 border-2 border-zinc-100 bg-white/50 backdrop-blur-sm hover:bg-zinc-50 hover:border-primary/20 rounded-xl text-sm font-medium text-zinc-800"
                             >
-                                <Link href="/optimize" className="flex items-center gap-2">
+                                <Link href="/playground" className="flex items-center gap-2">
                                     <Terminal className="w-4 h-4 text-primary" />
                                     OPTIMIZE_PROMPT
                                 </Link>

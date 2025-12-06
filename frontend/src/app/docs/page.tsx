@@ -153,7 +153,7 @@ export default function DocsPage() {
                     transition={{ delay: 0.8 }}
                 >
                     <Button asChild variant="outline" className="font-mono gap-2">
-                        <Link href="/optimize">
+                        <Link href="/playground">
                             <ArrowLeft className="w-4 h-4" />
                             Back to Playground
                         </Link>

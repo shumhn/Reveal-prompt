@@ -25,7 +25,7 @@ export function Header() {
             NETWORK
           </Link>
           <Link
-            href="/optimize"
+            href="/playground"
             className="text-foreground hover:text-primary hover:underline decoration-2 underline-offset-4 transition-all"
           >
             PLAYGROUND
@@ -49,7 +49,7 @@ export function Header() {
             <Link href="/auth/login">SIGN IN</Link>
           </Button>
           <Button asChild size="sm" className="bg-primary text-white hover:bg-primary/90 rounded-none font-mono font-bold border-2 border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
-            <Link href="/optimize">GET STARTED</Link>
+            <Link href="/playground">GET STARTED</Link>
           </Button>
         </div>
       </div>

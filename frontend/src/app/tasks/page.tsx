@@ -124,7 +124,7 @@ export default function TasksPage() {
                         </p>
                     </div>
                     <div className="flex items-center gap-3 mt-4 md:mt-0 flex-shrink-0">
-                        <Link href="/optimize">
+                        <Link href="/playground">
                             <Button className="h-9 px-4 bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all hover:shadow-primary/30 hover:-translate-y-0.5 font-mono text-[10px] uppercase tracking-wider">
                                 <Sparkles className="w-3 h-3 mr-2" />
                                 New_Optimization

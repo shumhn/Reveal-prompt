@@ -57,8 +57,8 @@ def agent_sync(data):
 
 const taskHistory = [
     {
-        id: "django_django-11400",
-        name: "django__django-11400",
+        id: "task-001",
+        name: "Optimization Task #1",
         status: "rejected",
         performance: 0.12,
         runtime: "08m 15s",
@@ -66,8 +66,8 @@ const taskHistory = [
         rejectionReason: "Output format mismatch"
     },
     {
-        id: "protein-translation-js",
-        name: "protein-translation-js",
+        id: "task-002",
+        name: "Optimization Task #2",
         status: "rejected",
         performance: 0.35,
         runtime: "03m 05s",
@@ -75,8 +75,8 @@ const taskHistory = [
         rejectionReason: "Test cases failed"
     },
     {
-        id: "sphinx-doc__sphinx-11510",
-        name: "sphinx-doc__sphinx-11510",
+        id: "task-003",
+        name: "Optimization Task #3",
         status: "rejected",
         performance: 0.08,
         runtime: "11m 40s",
@@ -84,8 +84,8 @@ const taskHistory = [
         rejectionReason: "Timeout exceeded"
     },
     {
-        id: "house-py",
-        name: "house-py",
+        id: "task-004",
+        name: "Optimization Task #4",
         status: "completed",
         performance: 0.94,
         runtime: "02m 28s",
@@ -93,8 +93,8 @@ const taskHistory = [
         rejectionReason: null
     },
     {
-        id: "pig-latin-js",
-        name: "pig-latin-js",
+        id: "task-005",
+        name: "Optimization Task #5",
         status: "completed",
         performance: 0.87,
         runtime: "03m 08s",
@@ -102,8 +102,8 @@ const taskHistory = [
         rejectionReason: null
     },
     {
-        id: "react-hooks-task",
-        name: "react-hooks-task",
+        id: "task-006",
+        name: "Optimization Task #6",
         status: "completed",
         performance: 0.92,
         runtime: "04m 12s",
@@ -111,8 +111,8 @@ const taskHistory = [
         rejectionReason: null
     },
     {
-        id: "async-await-fix",
-        name: "async-await-fix",
+        id: "task-007",
+        name: "Optimization Task #7",
         status: "pending",
         performance: null,
         runtime: "01m 45s",
@@ -302,25 +302,62 @@ export default function MinerDetailPage() {
 
                                 <div className="flex-1 overflow-hidden bg-white/50">
                                     {activeTab === "code" ? (
-                                        <div className="h-[560px] bg-white border-t border-zinc-100">
-                                            <MonacoEditor
-                                                height="560px"
-                                                defaultLanguage="python"
-                                                theme="vs"
-                                                value={agentSourceCode}
-                                                options={{
-                                                    readOnly: true,
-                                                    minimap: { enabled: false },
-                                                    fontSize: 13,
-                                                    lineNumbers: "on",
-                                                    scrollBeyondLastLine: false,
-                                                    fontFamily: "JetBrains Mono, monospace",
-                                                    padding: { top: 16, bottom: 16 },
-                                                    lineNumbersMinChars: 4,
-                                                    glyphMargin: false,
-                                                    folding: false
-                                                }}
-                                            />
+                                        <div className="h-[560px] bg-white border-t border-zinc-100 relative overflow-hidden">
+                                            {/* Blurred Monaco Editor - visible as backdrop */}
+                                            <div className="absolute inset-0 blur-[6px] pointer-events-none">
+                                                <MonacoEditor
+                                                    height="560px"
+                                                    defaultLanguage="python"
+                                                    theme="vs"
+                                                    value={agentSourceCode}
+                                                    options={{
+                                                        readOnly: true,
+                                                        minimap: { enabled: false },
+                                                        fontSize: 13,
+                                                        lineNumbers: "on",
+                                                        scrollBeyondLastLine: false,
+                                                        fontFamily: "JetBrains Mono, monospace",
+                                                        padding: { top: 16, bottom: 16 },
+                                                        lineNumbersMinChars: 4,
+                                                        glyphMargin: false,
+                                                        folding: false
+                                                    }}
+                                                />
+                                            </div>
+
+                                            {/* Semi-transparent overlay - lets code show through */}
+                                            <div className="absolute inset-0 flex items-center justify-center bg-white/70 backdrop-blur-[1px]">
+
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: 0.2 }}
+                                                    className="text-center p-8 max-w-lg relative z-10"
+                                                >
+                                                    {/* Glowing icon container */}
+                                                    <div className="relative inline-flex mb-6">
+                                                        <div className="absolute inset-0 rounded-2xl bg-primary/20 blur-xl animate-pulse" />
+                                                        <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/25">
+                                                            <Code className="w-10 h-10 text-white" />
+                                                        </div>
+                                                    </div>
+
+                                                    <h3 className="text-2xl font-bold text-zinc-900 mb-3 font-mono tracking-tight">
+                                                        Source Code Viewer
+                                                    </h3>
+                                                    <p className="text-sm text-zinc-500 mb-6 leading-relaxed max-w-sm mx-auto">
+                                                        Inspect miner agent implementations, analyze optimization strategies, and understand how top performers achieve their scores.
+                                                    </p>
+
+                                                    <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-zinc-900 text-white text-xs font-bold uppercase tracking-wider shadow-lg">
+                                                        <span className="relative flex h-2 w-2">
+                                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                                                        </span>
+                                                        In Development
+                                                    </div>
+                                                </motion.div>
+                                            </div>
                                         </div>
                                     ) : (
                                         <div className="flex flex-col h-full">
